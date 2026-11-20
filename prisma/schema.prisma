@@ -1,0 +1,138 @@
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum CashMovementType {
+  DEPOSIT
+  WITHDRAWAL
+
+  @@map("cash_movement_type")
+}
+
+enum OrderSide {
+  BUY
+  SELL
+
+  @@map("order_side")
+}
+
+enum OrderStatus {
+  PENDING
+  EXECUTED
+  REJECTED
+  CANCELLED
+
+  @@map("order_status")
+}
+
+model User {
+  id         String      @id @default(uuid()) @db.Uuid
+  fullName   String      @map("full_name") @db.VarChar(150)
+  email      String      @unique @db.VarChar(254)
+  phone      String?     @db.VarChar(30)
+  createdAt  DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime    @updatedAt @map("updated_at") @db.Timestamptz(6)
+  portfolios Portfolio[]
+
+  @@map("users")
+}
+
+model Portfolio {
+  id                 String              @id @default(uuid()) @db.Uuid
+  userId             String              @map("user_id") @db.Uuid
+  name               String              @db.VarChar(120)
+  description        String?             @db.Text
+  baseCurrency       String              @default("USD") @map("base_currency") @db.Char(3)
+  cashBalance        Decimal             @default(0) @map("cash_balance") @db.Decimal(20, 2)
+  createdAt          DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime            @updatedAt @map("updated_at") @db.Timestamptz(6)
+  user               User                @relation(fields: [userId], references: [id], onDelete: Restrict)
+  holdings           Holding[]
+  cashMovements      CashMovement[]
+  stockOrders        StockOrder[]
+  idempotencyRecords IdempotencyRecord[]
+
+  @@index([userId])
+  @@map("portfolios")
+}
+
+model Stock {
+  id             String       @id @default(uuid()) @db.Uuid
+  symbol         String       @unique @db.VarChar(12)
+  companyName    String       @map("company_name") @db.VarChar(150)
+  currency       String       @default("USD") @db.Char(3)
+  currentPrice   Decimal      @map("current_price") @db.Decimal(20, 6)
+  priceUpdatedAt DateTime     @map("price_updated_at") @db.Timestamptz(6)
+  holdings       Holding[]
+  orders         StockOrder[]
+
+  @@map("stocks")
+}
+
+model Holding {
+  id          String    @id @default(uuid()) @db.Uuid
+  portfolioId String    @map("portfolio_id") @db.Uuid
+  stockId     String    @map("stock_id") @db.Uuid
+  quantity    Decimal   @db.Decimal(20, 8)
+  portfolio   Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Restrict)
+  stock       Stock     @relation(fields: [stockId], references: [id], onDelete: Restrict)
+
+  @@unique([portfolioId, stockId])
+  @@index([stockId])
+  @@map("holdings")
+}
+
+model CashMovement {
+  id                String              @id @default(uuid()) @db.Uuid
+  portfolioId       String              @map("portfolio_id") @db.Uuid
+  type              CashMovementType
+  amount            Decimal             @db.Decimal(20, 2)
+  effectiveAt       DateTime            @map("effective_at") @db.Timestamptz(6)
+  createdAt         DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
+  portfolio         Portfolio           @relation(fields: [portfolioId], references: [id], onDelete: Restrict)
+  idempotencyRecord IdempotencyRecord?
+
+  @@index([portfolioId, effectiveAt(sort: Desc), id(sort: Desc)])
+  @@map("cash_movements")
+}
+
+model StockOrder {
+  id                String              @id @default(uuid()) @db.Uuid
+  portfolioId       String              @map("portfolio_id") @db.Uuid
+  stockId           String              @map("stock_id") @db.Uuid
+  side              OrderSide
+  quantity          Decimal             @db.Decimal(20, 8)
+  executedPrice     Decimal?            @map("executed_price") @db.Decimal(20, 6)
+  status            OrderStatus
+  createdAt         DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
+  executedAt        DateTime?           @map("executed_at") @db.Timestamptz(6)
+  portfolio         Portfolio           @relation(fields: [portfolioId], references: [id], onDelete: Restrict)
+  stock             Stock               @relation(fields: [stockId], references: [id], onDelete: Restrict)
+  idempotencyRecord IdempotencyRecord?
+
+  @@index([portfolioId, executedAt(sort: Desc), id(sort: Desc)])
+  @@index([stockId])
+  @@map("stock_orders")
+}
+
+model IdempotencyRecord {
+  id             String        @id @default(uuid()) @db.Uuid
+  portfolioId    String        @map("portfolio_id") @db.Uuid
+  key            String        @db.VarChar(128)
+  requestHash    String        @map("request_hash") @db.Char(64)
+  cashMovementId String?       @unique @map("cash_movement_id") @db.Uuid
+  stockOrderId   String?       @unique @map("stock_order_id") @db.Uuid
+  createdAt      DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  portfolio      Portfolio     @relation(fields: [portfolioId], references: [id], onDelete: Restrict)
+  cashMovement   CashMovement? @relation(fields: [cashMovementId], references: [id], onDelete: Restrict)
+  stockOrder     StockOrder?   @relation(fields: [stockOrderId], references: [id], onDelete: Restrict)
+
+  @@unique([portfolioId, key])
+  @@map("idempotency_records")
+}
