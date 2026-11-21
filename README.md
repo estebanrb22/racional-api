@@ -353,13 +353,3 @@ La IA se utilizó como herramienta de asistencia para analizar requisitos, compa
 Las decisiones finales fueron contrastadas contra el comportamiento real de NestJS, Prisma y PostgreSQL. Durante el desarrollo se ejecutaron migraciones, seed, compilación y pruebas E2E reales. Los errores encontrados, como cambios de CLI en Prisma 7 y configuración de Supertest, se investigaron y corrigieron antes de documentar los comandos.
 
 La IA no sustituye revisión humana de seguridad, producto ni operación en producción.
-
-## Trabajo futuro
-
-- Autenticación y autorización por propietario del portafolio.
-- Integración con brokers y ciclo de vida completo de órdenes.
-- Proveedor confiable de precios y tratamiento de mercados cerrados.
-- Ledger de doble entrada y conciliación para dinero real.
-- Auditoría de cambios administrativos.
-- Paginación por cursor para historiales extensos.
-- Observabilidad, rate limiting y gestión de secretos para producción.
