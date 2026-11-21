@@ -22,7 +22,10 @@ export class PortfoliosController {
 
   @Get(':portfolioId')
   @ApiOperation({ summary: 'Get portfolio metadata and cash balance' })
-  findOne(@Param('portfolioId', new ParseUUIDPipe()) portfolioId: string) {
+  findOne(
+    @Param('portfolioId', new ParseUUIDPipe({ version: '4' }))
+    portfolioId: string,
+  ) {
     return this.portfolios.findOne(portfolioId);
   }
 
@@ -31,7 +34,8 @@ export class PortfoliosController {
   @ApiOkResponse({ description: 'Updated portfolio' })
   @ApiBadRequestResponse({ description: 'Invalid or forbidden fields' })
   update(
-    @Param('portfolioId', new ParseUUIDPipe()) portfolioId: string,
+    @Param('portfolioId', new ParseUUIDPipe({ version: '4' }))
+    portfolioId: string,
     @Body() dto: UpdatePortfolioDto,
   ) {
     return this.portfolios.update(portfolioId, dto);
@@ -39,7 +43,10 @@ export class PortfoliosController {
 
   @Get(':portfolioId/valuation')
   @ApiOperation({ summary: 'Calculate portfolio value at current prices' })
-  valuation(@Param('portfolioId', new ParseUUIDPipe()) portfolioId: string) {
+  valuation(
+    @Param('portfolioId', new ParseUUIDPipe({ version: '4' }))
+    portfolioId: string,
+  ) {
     return this.portfolios.valuation(portfolioId);
   }
 }

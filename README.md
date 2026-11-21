@@ -344,6 +344,7 @@ Limitaciones deliberadas:
 - Sin órdenes pendientes, cancelaciones ni ejecución parcial.
 - El historial usa un límite y no un cursor; es suficiente para los movimientos recientes solicitados.
 - Los holdings en cero se conservan para simplificar concurrencia, pero no aparecen en la valoración.
+- `npm audit` reporta vulnerabilidades en `effect`, una dependencia transitiva del CLI de Prisma 7 (`@prisma/config`). No forma parte del runtime HTTP y la corrección automática degradaría a Prisma 6.
 
 ## Uso de inteligencia artificial
 

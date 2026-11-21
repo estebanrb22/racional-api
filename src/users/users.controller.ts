@@ -27,7 +27,9 @@ export class UsersController {
   @ApiOperation({ summary: 'Get a user' })
   @ApiOkResponse({ description: 'User details' })
   @ApiNotFoundResponse({ description: 'User not found' })
-  findOne(@Param('userId', new ParseUUIDPipe()) userId: string) {
+  findOne(
+    @Param('userId', new ParseUUIDPipe({ version: '4' })) userId: string,
+  ) {
     return this.users.findOne(userId);
   }
 
@@ -36,7 +38,7 @@ export class UsersController {
   @ApiOkResponse({ description: 'Updated user' })
   @ApiBadRequestResponse({ description: 'Invalid or forbidden fields' })
   update(
-    @Param('userId', new ParseUUIDPipe()) userId: string,
+    @Param('userId', new ParseUUIDPipe({ version: '4' })) userId: string,
     @Body() dto: UpdateUserDto,
   ) {
     return this.users.update(userId, dto);
@@ -46,7 +48,7 @@ export class UsersController {
   @ApiOperation({ summary: 'List recent cash movements and stock orders' })
   @ApiOkResponse({ description: 'Deterministically ordered movements' })
   movements(
-    @Param('userId', new ParseUUIDPipe()) userId: string,
+    @Param('userId', new ParseUUIDPipe({ version: '4' })) userId: string,
     @Query() query: MovementsQueryDto,
   ) {
     return this.users.movements(userId, query.limit);

@@ -33,7 +33,8 @@ export class OrdersController {
     description: 'Insufficient cash, shares or idempotency conflict',
   })
   create(
-    @Param('portfolioId', new ParseUUIDPipe()) portfolioId: string,
+    @Param('portfolioId', new ParseUUIDPipe({ version: '4' }))
+    portfolioId: string,
     @IdempotencyKey(IdempotencyKeyPipe) idempotencyKey: string,
     @Body() dto: CreateOrderDto,
   ) {

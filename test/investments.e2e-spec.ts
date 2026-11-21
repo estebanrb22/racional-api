@@ -319,6 +319,25 @@ describe('Investment API (e2e)', () => {
     expect(response.body.code).toBe('VALIDATION_ERROR');
   });
 
+  it('rejects null for required editable fields instead of failing internally', async () => {
+    for (const [path, body] of [
+      [`/users/${ids.user}`, { fullName: null }],
+      [`/users/${ids.user}`, { email: null }],
+      [`/portfolios/${ids.portfolio}`, { name: null }],
+    ] as const) {
+      const response = await request(app.getHttpServer())
+        .patch(path)
+        .send(body)
+        .expect(400);
+      expect(response.body.code).toBe('VALIDATION_ERROR');
+    }
+
+    await request(app.getHttpServer())
+      .patch(`/portfolios/${ids.portfolio}`)
+      .send({ description: null })
+      .expect(200);
+  });
+
   it('allows only one of two concurrent withdrawals to consume the balance', async () => {
     await deposit('100.00', 'concurrent-deposit-1');
     const body = movementBody('80.00');

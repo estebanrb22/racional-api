@@ -30,7 +30,8 @@ export class CashMovementsController {
   @ApiHeader({ name: 'Idempotency-Key', required: true })
   @ApiCreatedResponse({ description: 'Deposit executed' })
   deposit(
-    @Param('portfolioId', new ParseUUIDPipe()) portfolioId: string,
+    @Param('portfolioId', new ParseUUIDPipe({ version: '4' }))
+    portfolioId: string,
     @IdempotencyKey(IdempotencyKeyPipe) idempotencyKey: string,
     @Body() dto: CashMovementDto,
   ) {
@@ -44,7 +45,8 @@ export class CashMovementsController {
   @ApiCreatedResponse({ description: 'Withdrawal executed' })
   @ApiConflictResponse({ description: 'Insufficient funds' })
   withdrawal(
-    @Param('portfolioId', new ParseUUIDPipe()) portfolioId: string,
+    @Param('portfolioId', new ParseUUIDPipe({ version: '4' }))
+    portfolioId: string,
     @IdempotencyKey(IdempotencyKeyPipe) idempotencyKey: string,
     @Body() dto: CashMovementDto,
   ) {
